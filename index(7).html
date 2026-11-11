@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Для Вані 😂</title>
+
+<style>
+body {
+  background: linear-gradient(135deg, #250044, #9d4edd);
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px 15px;
+}
+
+.container {
+  max-width: 400px;
+  margin: auto;
+  padding: 25px;
+  border-radius: 25px;
+  background: #250044;
+}
+
+.top {
+  color: #ff99cc;
+  font-size: 22px;
+  margin-bottom: 25px;
+}
+
+h1 {
+  color: #ffff00;
+}
+
+.volume {
+  background: #43006d;
+  padding: 15px;
+  border-radius: 15px;
+  margin: 20px 0;
+}
+
+.bar {
+  background: #ffffff33;
+  height: 9px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.level {
+  background: #ff66aa;
+  width: 50%;
+  height: 9px;
+}
+
+button {
+  background: #ff006e;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 18px;
+  font-size: 23px;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+#result {
+  display: none;
+}
+
+.witch {
+  font-size: 100px;
+  animation: bounce 0.7s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="top">
+Переведено для Вані ❤️
+</div>
+
+<div id="menu">
+<h1>ТИ ГОТОВИЙ? 😈</h1>
+
+<div class="volume">
+🔊 Гучність: 50%
+<div class="bar">
+<div class="level"></div>
+</div>
+</div>
+
+<p>✨ 👻 ✨</p>
+
+<button onclick="start()">
+Я ГОТОВИЙ 😎
+</button>
+</div>
+
+<div id="result">
+<h1>БУУУУ! 😂</h1>
+
+<div class="witch">🧙‍♀️</div>
+
+<h1>БАБКА ЙОЖКА!</h1>
+<h1>ФІГНЯАААА!!! 🤣</h1>
+
+<p>💥 ✨ 💥</p>
+</div>
+
+</div>
+
+<script>
+function playSound() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    if (ctx.state === "suspended") ctx.resume();
+    const t = ctx.currentTime;
+    const dur = 1.8;
+
+    // master gain with sharp attack and decay
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, t);
+    master.gain.exponentialRampToValueAtTime(0.9, t + 0.03);
+    master.gain.setValueAtTime(0.9, t + dur - 0.5);
+    master.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    master.connect(ctx.destination);
+
+    // scream: two detuned sawtooth oscillators sweeping up
+    [0, 7].forEach(detune => {
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.detune.value = detune * 100;
+      osc.frequency.setValueAtTime(500, t);
+      osc.frequency.exponentialRampToValueAtTime(1700, t + 0.25);
+      osc.frequency.exponentialRampToValueAtTime(1100, t + dur);
+
+      // vibrato
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.frequency.value = 14;
+      lfoGain.gain.value = 90;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+
+      const g = ctx.createGain();
+      g.gain.value = 0.35;
+      osc.connect(g);
+      g.connect(master);
+
+      osc.start(t); lfo.start(t);
+      osc.stop(t + dur); lfo.stop(t + dur);
+    });
+
+    // noise burst for harshness
+    const len = Math.floor(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 2500;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.5, t);
+    ng.gain.exponentialRampToValueAtTime(0.05, t + dur);
+    noise.connect(filter);
+    filter.connect(ng);
+    ng.connect(master);
+    noise.start(t);
+  } catch (e) {
+    console.log("Audio error:", e);
+  }
+}
+
+function start() {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("result").style.display = "block";
+  playSound();
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+</script>
+
+</body>
+</html>
